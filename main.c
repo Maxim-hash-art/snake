@@ -52,36 +52,47 @@ struct snake {
     struct tail *tail;
 } snake;
 
+/* задержка прорисовки с учётом направления движения */
+void tim_out_draw(struct snake *head)
+{
+	if (head->direction == UP ||   head->direction == DOWN) timeout(150);
+        else timeout(100); // Задержка при отрисовке
+}
+
 /*
  Движение головы с учетом текущего направления движения
  */
 void go(struct snake *head) {
-    char ch[]="@";
+    char ch[]=" ";
     int max_x=0, max_y=0;
     getmaxyx(stdscr, max_y, max_x); // macro - размер терминала
     //clear(); // очищаем весь экран
     mvprintw(head->y, head->x, " "); // очищаем один символ
     switch (head->direction) {
         case LEFT:
+        //ch='<';
             if(head->x <= 0) // Циклическое движение, что бы не
                 // уходить за пределы экрана
                 head->x = max_x;
-            mvprintw(head->y, --(head->x), ch);
+            mvprintw(head->y, --(head->x), "<");
             break;
         case RIGHT:
+        //ch='>';
             if(head->x >= max_x)
                 head->x = 0;
-            mvprintw(head->y, ++(head->x), ch);
+            mvprintw(head->y, ++(head->x), ">");
             break;
         case UP:
-            if(head->y <= 0)
+        //ch='^';
+            if(head->y <= 1)
                 head->y = max_y;
-            mvprintw(--(head->y), head->x, ch);
+            mvprintw(--(head->y), head->x, "^");
             break;
         case DOWN:
+        //ch='^';
             if(head->y >= max_y)
                 head->y = 0;
-            mvprintw(++(head->y), head->x, ch);
+            mvprintw(++(head->y), head->x, "v");
             break;
         default:
             break;
@@ -170,6 +181,7 @@ void addTail(struct snake *head) {
         return;
     }
     head->tsize++;
+    char beep = '\a';
 }
 void printHelp(char *s) {
     mvprintw(0, 0, s);
@@ -285,7 +297,7 @@ int main()
         key_pressed = getch(); // Считываем клавишу
         if(checkDirection(snake.direction, key_pressed)) //Проверка корректности смены направления
         {
-            changeDirection(&snake.direction, key_pressed); // Меняем напарвление движения
+            changeDirection(&snake.direction, key_pressed); // Меняем направление движения
         }
         if(isCrash(&snake))
             break;
@@ -298,7 +310,7 @@ int main()
         refreshFood(food, SEED_NUMBER);// Обновляем еду
         repairSeed(food, SEED_NUMBER, &snake);
         blinkFood(food, SEED_NUMBER);
-        timeout(100); // Задержка при отрисовке
+        tim_out_draw(&snake); // Задержка при отрисовке в зависимости от направления движения
     }
     printExit(&snake);
     timeout(SPEED);
